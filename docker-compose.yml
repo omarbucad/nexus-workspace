@@ -1,33 +1,39 @@
-
 services:
   app:
     build:
       context: ./backend
       dockerfile: Dockerfile
     restart: unless-stopped
+    ports:
+      - 9000:9000
     env_file:
       - ./backend/.env
     volumes:
-      - ./backend:/usr/share/nginx/html
-    expose:
-      - 9000
-
-  horizon-app:
+      - storage:/usr/share/nginx/html/storage:rw
+      - public:/usr/share/nginx/html/public:rw
+  queue-worker:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    command: php artisan horizon
+    restart: unless-stopped
+    command: php artisan queue:work
     environment:
       IS_WORKER: "true"
     env_file:
       - ./backend/.env
     volumes:
-      - ./backend:/usr/share/nginx/html
-
+      - storage:/usr/share/nginx/html/storage:rw
+      - public:/usr/share/nginx/html/public:rw
   nginx:
     image: nginx:1-alpine
     ports:
       - 80:80
+      - 443:443
     volumes:
-      - ./backend:/usr/share/nginx/html:ro
       - ./nginx.conf:/etc/nginx/templates/default.conf.template
+      - storage:/usr/share/nginx/html/storage:rw
+      - public:/usr/share/nginx/html/public:ro
+
+volumes:
+  storage:
+  public:
