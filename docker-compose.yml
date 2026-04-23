@@ -24,18 +24,6 @@ services:
       - storage:/usr/share/nginx/html/storage:rw
       - public:/usr/share/nginx/html/public:rw
 
-
-  nginx-app:
-    image: nginx:1-alpine
-    restart: unless-stopped
-    ports:
-      - 80:80
-      - 443:443
-    volumes:
-      - ./nginx.conf:/etc/nginx/templates/default.conf.template
-      - storage:/usr/share/nginx/html/storage:rw
-      - public:/usr/share/nginx/html/public:ro
-
 volumes:
   storage:
   public:

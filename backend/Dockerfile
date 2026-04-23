@@ -40,8 +40,6 @@ COPY composer.json composer.lock ./
 RUN composer install --no-dev --optimize-autoloader --no-scripts \
     && composer clear-cache
 
-RUN echo "memory_limit=1024M" > /usr/local/etc/php/conf.d/memory-limit.ini
-
 # Copy application code
 COPY . .
 
