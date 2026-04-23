@@ -1,0 +1,33 @@
+
+services:
+  app:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend:/usr/share/nginx/html
+    expose:
+      - 9000
+
+  horizon-app:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: php artisan horizon
+    environment:
+      IS_WORKER: "true"
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend:/usr/share/nginx/html
+
+  nginx:
+    image: nginx:1-alpine
+    ports:
+      - 80:80
+    volumes:
+      - ./backend:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/templates/default.conf.template
