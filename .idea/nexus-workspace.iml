@@ -117,6 +117,8 @@
       <excludeFolder url="file://$MODULE_DIR$/backend/storage/app" />
       <excludeFolder url="file://$MODULE_DIR$/backend/storage/framework" />
       <excludeFolder url="file://$MODULE_DIR$/backend/storage/pail" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/laravel/horizon" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/laravel/sentinel" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

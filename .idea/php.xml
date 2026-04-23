@@ -134,6 +134,8 @@
       <path value="$PROJECT_DIR$/backend/vendor/inertiajs/inertia-laravel" />
       <path value="$PROJECT_DIR$/backend/vendor/shipfastlabs/agent-detector" />
       <path value="$PROJECT_DIR$/backend/vendor/nunomaduro/pao" />
+      <path value="$PROJECT_DIR$/backend/vendor/laravel/horizon" />
+      <path value="$PROJECT_DIR$/backend/vendor/laravel/sentinel" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.3" />
