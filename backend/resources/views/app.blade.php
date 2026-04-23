@@ -12,10 +12,12 @@
         <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
 
 
-        @routes
         @viteReactRefresh
-        @vite(['resources/js/app.jsx', "resources/js/pages/{$page['component']}.jsx"])
-        @inertiaHead
+        @vite(['resources/css/app.css', 'resources/js/app.tsx'])
+
+        <x-inertia::head>
+            <title>{{ config('app.name', 'Laravel') }}</title>
+        </x-inertia::head>
     </head>
     <body class="font-sans antialiased">
         <x-inertia::app />
