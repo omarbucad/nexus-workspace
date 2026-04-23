@@ -2,29 +2,40 @@
 import { createInertiaApp } from '@inertiajs/react'
 import { createRoot } from 'react-dom/client'
 
-// @ts-ignore
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel'
 
-// This tells Vite about your pages so they can be imported on demand.
-// Adjust the glob if your folder name casing differs (Pages vs pages).
-const pages = import.meta.glob('./pages/**/*.tsx')
+// Support both conventions: ./pages and ./Pages
+const pages = {
+    ...import.meta.glob('./pages/**/*.tsx'),
+    ...import.meta.glob('./Pages/**/*.tsx'),
+}
 
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
 
     resolve: async (name) => {
-        const page = pages[`./pages/${name}.tsx`]
-        if (!page) {
-            throw new Error(`Inertia page not found: ./pages/${name}.tsx`)
-        }
-        return page()
+        // Try exact match first
+        const exact =
+            pages[`./pages/${name}.tsx`] ||
+            pages[`./Pages/${name}.tsx`]
+
+        if (exact) return exact()
+
+        // Try common "Welcome" vs "welcome" normalization
+        const pascal = name.charAt(0).toUpperCase() + name.slice(1)
+
+        const normalized =
+            pages[`./pages/${pascal}.tsx`] ||
+            pages[`./Pages/${pascal}.tsx`]
+
+        if (normalized) return normalized()
+
+        throw new Error(`Page not found: ${name}`)
     },
 
     setup({ el, App, props }) {
         createRoot(el).render(<App {...props} />)
     },
 
-    progress: {
-        color: '#4B5563',
-    },
+    progress: { color: '#4B5563' },
 })
