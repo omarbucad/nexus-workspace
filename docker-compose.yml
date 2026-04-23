@@ -23,7 +23,7 @@ services:
       - storage:/usr/share/nginx/html/storage:rw
       - public:/usr/share/nginx/html/public:rw
 
-  nginx-app:
+  nginx:
     image: nginx:1-alpine
     restart: unless-stopped
     depends_on:
@@ -36,6 +36,16 @@ services:
       - storage:/usr/share/nginx/html/storage:rw
       - public:/usr/share/nginx/html/public:ro
 
+  redis:
+    image: redis:7.4.6-alpine
+    platform: linux/amd64
+    restart: always
+    volumes:
+      - redis-data:/bitnami/redis/data
+    networks:
+      - frontend
+
 volumes:
   storage:
   public:
+  redis-data:
