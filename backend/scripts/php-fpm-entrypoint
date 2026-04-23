@@ -1,42 +1,60 @@
-#!/bin/sh
-set -e
+#!/bin/bash
 
-echo "Starting container role: ${IS_WORKER:-app}"
+main() {
+    if [ "$IS_WORKER" = "true" ]; then
+        exec "$@"
+    else
+        prepare_file_permissions
+        run_npm_build
+        prepare_storage
+        run_migrations
+        optimize_app
+        run_server "$@"
+    fi
+}
 
-###############################################################################
-# WORKERS (Horizon / queue containers)
-###############################################################################
-if [ "${IS_WORKER}" = "true" ]; then
-  echo "Starting Horizon worker"
-  exec php artisan horizon
-fi
+prepare_file_permissions() {
+    chmod a+x ./artisan
+}
 
-###############################################################################
-# APP CONTAINER (PHP-FPM)
-###############################################################################
+run_npm_build() {
+    echo "Installing NPM dependencies"
+    if [ -f "package.json" ]; then
+        echo "Running NPM clean install"
+        npm ci
 
-echo "Running app boot steps"
+        echo "Running NPM build"
+        npm run build
+    else
+        echo "No package.json found, skipping NPM build"
+    fi
+}
 
-# Ensure artisan executable
-chmod +x artisan || true
+prepare_storage() {
+    # Create required directories for Laravel
+    mkdir -p /usr/share/nginx/html/storage/framework/cache/data
+    mkdir -p /usr/share/nginx/html/storage/framework/sessions
+    mkdir -p /usr/share/nginx/html/storage/framework/views
 
-# Storage preparation (safe to re-run)
-mkdir -p storage/framework/{cache/data,sessions,views}
-chown -R www-data:www-data storage bootstrap/cache
-chmod -R 775 storage bootstrap/cache
+    # Set permissions for the storage directory
+    chown -R www-data:www-data /usr/share/nginx/html/storage
+    chmod -R 775 /usr/share/nginx/html/storage
 
-# Storage symlink (no failure if exists)
-php artisan storage:link || true
+    # Ensure the symlink exists
+    php artisan storage:link
+}
 
-# Database migrations (non-blocking, production-safe)
-php artisan migrate --force || true
+run_migrations() {
+    ./artisan migrate
+}
 
-# Cache warm-up (safe + fast)
-php artisan optimize:clear || true
-php artisan optimize || true
+optimize_app() {
+    ./artisan optimize:clear
+    ./artisan optimize
+}
 
-###############################################################################
-# START PHP-FPM (MUST BE PID 1)
-###############################################################################
-echo "Starting PHP-FPM"
-exec php-fpm -F
+run_server() {
+    exec /usr/local/bin/docker-php-entrypoint "$@"
+}
+
+main "$@"
