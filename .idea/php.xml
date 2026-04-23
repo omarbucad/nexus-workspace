@@ -127,6 +127,13 @@
       <path value="$PROJECT_DIR$/backend/vendor/tightenco/ziggy" />
       <path value="$PROJECT_DIR$/backend/vendor/laravel/sanctum" />
       <path value="$PROJECT_DIR$/backend/vendor/laravel/breeze" />
+      <path value="$PROJECT_DIR$/backend/vendor/laravel/sail" />
+      <path value="$PROJECT_DIR$/backend/vendor/laravel/wayfinder" />
+      <path value="$PROJECT_DIR$/backend/vendor/phpstan/phpdoc-parser" />
+      <path value="$PROJECT_DIR$/backend/vendor/symfony/yaml" />
+      <path value="$PROJECT_DIR$/backend/vendor/inertiajs/inertia-laravel" />
+      <path value="$PROJECT_DIR$/backend/vendor/shipfastlabs/agent-detector" />
+      <path value="$PROJECT_DIR$/backend/vendor/nunomaduro/pao" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.3" />
