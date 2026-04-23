@@ -36,12 +36,11 @@ services:
       - storage:/usr/share/nginx/html/storage:rw
       - public:/usr/share/nginx/html/public:ro
 
+
   redis:
     image: redis:7.4.6-alpine
-    platform: linux/amd64
     restart: always
-    volumes:
-      - redis-data:/bitnami/redis/data
+
 
 volumes:
   storage:
