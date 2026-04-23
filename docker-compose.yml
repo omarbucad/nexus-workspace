@@ -42,8 +42,6 @@ services:
     restart: always
     volumes:
       - redis-data:/bitnami/redis/data
-    networks:
-      - frontend
 
 volumes:
   storage:
