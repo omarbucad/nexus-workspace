@@ -21,7 +21,7 @@ COPY . .
 RUN npm run build
 
 # ---------- Stage 3: Runtime ----------
-FROM php:8.4-fpm AS app
+FROM php:8.4-fpm-alpine AS app
 
 WORKDIR /usr/share/nginx/html
 
