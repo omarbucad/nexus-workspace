@@ -1,6 +1,12 @@
 # ---------- Stage 1: Composer deps ----------
 FROM composer:2 AS vendor
 WORKDIR /app
+
+RUN apt-get update && apt-get install -y \
+    $PHPIZE_DEPS \
+    && docker-php-ext-install pcntl \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY composer.json composer.lock ./
 RUN composer install \
   --no-dev \
