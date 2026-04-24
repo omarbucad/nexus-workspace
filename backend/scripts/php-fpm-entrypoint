@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/bin/sh
+set -e
 
 main() {
     if [ "$IS_WORKER" = "true" ]; then
@@ -29,16 +30,16 @@ prepare_storage() {
     chmod -R 775 /usr/share/nginx/html/storage
 
     # Ensure the symlink exists
-    php artisan storage:link
+    php artisan storage:link || true
 }
 
 run_migrations() {
-    ./artisan migrate
+    php artisan migrate --force
 }
 
 optimize_app() {
-    ./artisan optimize:clear
-    ./artisan optimize
+    php artisan optimize:clear
+    php artisan optimize
 }
 
 run_server() {
