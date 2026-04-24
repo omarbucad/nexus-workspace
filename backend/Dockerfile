@@ -2,7 +2,6 @@
 FROM composer:2 AS vendor
 WORKDIR /app
 
-COPY . .
 RUN composer install \
   --no-dev \
   --prefer-dist \
@@ -21,7 +20,7 @@ COPY . .
 RUN npm run build
 
 # ---------- Stage 3: Runtime ----------
-FROM php:8.3-fpm AS app
+FROM php:8.4-fpm AS app
 
 WORKDIR /var/www
 
