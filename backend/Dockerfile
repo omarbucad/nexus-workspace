@@ -1,6 +1,6 @@
 # ---------- Stage 1: Composer deps ----------
 FROM composer:2 AS vendor
-WORKDIR /app
+WORKDIR /usr/share/nginx/html
 
 COPY . .
 RUN composer install \
@@ -23,7 +23,7 @@ RUN npm run build
 # ---------- Stage 3: Runtime ----------
 FROM php:8.4-fpm AS app
 
-WORKDIR /var/www
+WORKDIR /usr/share/nginx/html
 
 RUN apt-get update && apt-get install -y \
     curl \
@@ -39,10 +39,10 @@ RUN docker-php-ext-install pdo pdo_mysql pgsql pdo_pgsql gd bcmath zip sockets \
     && pecl install redis \
     && docker-php-ext-enable redis
 
-COPY --from=vendor /app /var/www
-COPY --from=frontend /app/public/build /var/www/public/build
+COPY --from=vendor /usr/share/nginx/html /usr/share/nginx/html
+COPY --from=frontend /app/public/build /usr/share/nginx/html/public/build
 
-RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+RUN chown -R www-data:www-data /usr/share/nginx/html/storage /usr/share/nginx/html/bootstrap/cache
 
 COPY ./scripts/php-fpm-entrypoint /usr/local/bin/php-entrypoint
 RUN chmod a+x /usr/local/bin/*
