@@ -2,6 +2,7 @@
 FROM composer:2 AS vendor
 WORKDIR /usr/share/nginx/html
 
+COPY . .
 RUN composer install \
   --no-dev \
   --prefer-dist \
@@ -9,7 +10,6 @@ RUN composer install \
   --optimize-autoloader \
   --ignore-platform-req=ext-pcntl
 
-COPY . .
 
 # ---------- Stage 2: Frontend build ----------
 FROM node:20-alpine AS frontend
