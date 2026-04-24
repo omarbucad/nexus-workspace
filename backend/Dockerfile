@@ -18,7 +18,9 @@ COPY . .
 RUN npm run build
 
 # ---------- Stage 3: Runtime ----------
-FROM php:8.4-fpm AS app
+FROM php:8.3-fpm AS app
+
+WORKDIR /var/www
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -27,15 +29,18 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libpq-dev \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* \
-
+    && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
 RUN docker-php-ext-install pdo pdo_mysql pgsql pdo_pgsql gd bcmath zip sockets \
     && docker-php-ext-configure pcntl --enable-pcntl \
     && docker-php-ext-install pcntl \
     && pecl install redis \
-    && docker-php-ext-enable redis \
+    && docker-php-ext-enable redis
+
+# Copy application code
+COPY --from=vendor /app /var/www
+COPY --from=frontend /app/public/build /var/www/public/build
 
 # Permissions (Laravel needs these)
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
