@@ -59,9 +59,12 @@ COPY --from=php-builder /app /usr/share/nginx/html
 COPY --from=frontend-builder /app/public/build /usr/share/nginx/html/public/build
 COPY ./scripts/php-fpm-entrypoint /usr/local/bin/php-entrypoint
 
-RUN sed -i 's/\r$//' /usr/local/bin/php-entrypoint && chmod +x /usr/local/bin/php-entrypoint \
-    && mkdir -p storage/framework/sessions storage/framework/views storage/framework/cache \
-    && chown -R app:app /usr/share/nginx/html
+RUN mkdir -p /usr/share/nginx/html/storage/framework/cache/data \
+    /usr/share/nginx/html/storage/framework/sessions \
+    /usr/share/nginx/html/storage/framework/views \
+    && chmod -R 775 /usr/share/nginx/html/storage \
+    && chown -R app:app /usr/share/nginx/html \
+    && chmod +x /usr/local/bin/php-entrypoint
 
 USER app
 
