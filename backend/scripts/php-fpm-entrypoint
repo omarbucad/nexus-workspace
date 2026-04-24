@@ -5,7 +5,6 @@ main() {
         exec "$@"
     else
         prepare_file_permissions
-        run_npm_build
         prepare_storage
         run_migrations
         optimize_app
@@ -17,18 +16,7 @@ prepare_file_permissions() {
     chmod a+x ./artisan
 }
 
-run_npm_build() {
-    echo "Installing NPM dependencies"
-    if [ -f "package.json" ]; then
-        echo "Running NPM clean install"
-        npm ci
 
-        echo "Running NPM build"
-        npm run build
-    else
-        echo "No package.json found, skipping NPM build"
-    fi
-}
 
 prepare_storage() {
     # Create required directories for Laravel

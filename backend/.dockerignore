@@ -1,11 +1,8 @@
-
 .git
-.env
 node_modules
 vendor
-storage/logs
-storage/framework/cache
-storage/framework/sessions
-storage/framework/views
 tests
-*.md
+storage/logs
+npm-debug.log
+Dockerfile
+docker-compose.yml
