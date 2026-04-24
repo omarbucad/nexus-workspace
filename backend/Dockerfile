@@ -29,6 +29,12 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+WORKDIR /var/www
+
+# Copy only what you need from build stages
+COPY --from=vendor /app /var/www
+COPY --from=frontend /app/public/build /var/www/public/build
+
 # Install PHP extensions
 RUN docker-php-ext-install pdo pdo_mysql pgsql pdo_pgsql gd bcmath zip sockets \
     && docker-php-ext-configure pcntl --enable-pcntl \
@@ -36,11 +42,8 @@ RUN docker-php-ext-install pdo pdo_mysql pgsql pdo_pgsql gd bcmath zip sockets \
     && pecl install redis \
     && docker-php-ext-enable redis \
 
-# Run Laravel commands and set permissions
-RUN php artisan package:discover --ansi \
-    && chmod -R 775 storage bootstrap/cache \
-    && chown -R www-data:www-data storage bootstrap/cache \
-    && mkdir -p storage/framework/{sessions,views,cache}
+# Permissions (Laravel needs these)
+RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
 # Copy entrypoint
 COPY ./scripts/php-fpm-entrypoint /usr/local/bin/php-entrypoint
