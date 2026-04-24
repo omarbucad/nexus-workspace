@@ -1,28 +1,60 @@
-#!/bin/sh
-set -e
+#!/bin/bash
 
-echo "Starting PHP-FPM entrypoint..."
+main() {
+    if [ "$IS_WORKER" = "true" ]; then
+        exec "$@"
+    else
+        prepare_file_permissions
+        run_npm_build
+        prepare_storage
+        run_migrations
+        optimize_app
+        run_server "$@"
+    fi
+}
 
-# Ensure required directories exist (idempotent)
-mkdir -p storage/framework/{cache,sessions,views} bootstrap/cache
+prepare_file_permissions() {
+    chmod a+x ./artisan
+}
 
-# Fix permissions only if needed (avoid recursive chown every start)
-if [ "$(stat -c '%U' storage)" != "www-data" ]; then
-  echo "Fixing storage and cache permissions..."
-  chown -R www-data:www-data storage bootstrap/cache
-  chmod -R 775 storage bootstrap/cache
-fi
+run_npm_build() {
+    echo "Installing NPM dependencies"
+    if [ -f "package.json" ]; then
+        echo "Running NPM clean install"
+        npm ci
 
-# Optionally cache config/routes/views in production
-# (safe because image already contains app + vendor)
-if [ "$APP_ENV" = "production" ]; then
-  echo "Optimizing Laravel caches..."
-  php artisan config:clear || true
-  php artisan config:cache || true
-  php artisan route:cache || true
-  php artisan view:clear || true
-fi
+        echo "Running NPM build"
+        npm run build
+    else
+        echo "No package.json found, skipping NPM build"
+    fi
+}
 
-# Hand over to the main container command
-echo "Launching PHP-FPM..."
-exec "$@"
+prepare_storage() {
+    # Create required directories for Laravel
+    mkdir -p /usr/share/nginx/html/storage/framework/cache/data
+    mkdir -p /usr/share/nginx/html/storage/framework/sessions
+    mkdir -p /usr/share/nginx/html/storage/framework/views
+
+    # Set permissions for the storage directory
+    chown -R www-data:www-data /usr/share/nginx/html/storage
+    chmod -R 775 /usr/share/nginx/html/storage
+
+    # Ensure the symlink exists
+    php artisan storage:link
+}
+
+run_migrations() {
+    ./artisan migrate
+}
+
+optimize_app() {
+    ./artisan optimize:clear
+    ./artisan optimize
+}
+
+run_server() {
+    exec /usr/local/bin/docker-php-entrypoint "$@"
+}
+
+main "$@"
