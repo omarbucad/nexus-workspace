@@ -61,7 +61,7 @@ RUN php artisan package:discover --ansi \
   && mkdir -p storage/framework/{sessions,views,cache}
 
 # Entrypoint
-COPY backend/scripts/php-fpm-entrypoint /usr/local/bin/php-entrypoint
+COPY ./scripts/php-fpm-entrypoint /usr/local/bin/php-entrypoint
 RUN chmod a+x /usr/local/bin/*
 
 ENTRYPOINT ["/usr/local/bin/php-entrypoint"]
