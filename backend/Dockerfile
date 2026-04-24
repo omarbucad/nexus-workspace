@@ -6,8 +6,6 @@ RUN apt-get update && apt-get install -y \
     curl \
     libzip-dev \
     libpng-dev \
-    postgresql-client \
-    default-mysql-client \
     libpq-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*

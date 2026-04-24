@@ -1,14 +1,16 @@
 import inertia from '@inertiajs/vite';
-import { wayfinder } from '@laravel/vite-plugin-wayfinder';
+// @ts-ignore
 import tailwindcss from '@tailwindcss/vite';
+// @ts-ignore
 import react from '@vitejs/plugin-react';
 import laravel from 'laravel-vite-plugin';
+// @ts-ignore
 import { defineConfig } from 'vite';
 
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.tsx'],
+            input: ['resources/css/app.css', 'resources/js/app.jsx'],
             refresh: true,
         }),
         inertia(),
@@ -17,9 +19,6 @@ export default defineConfig({
                 plugins: ['babel-plugin-react-compiler'],
             },
         }),
-        tailwindcss(),
-        wayfinder({
-            formVariants: true,
-        }),
+        tailwindcss()
     ],
 });
