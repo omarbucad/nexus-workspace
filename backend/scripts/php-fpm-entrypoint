@@ -4,17 +4,12 @@ set -e
 main() {
     if [ "$IS_WORKER" = "true" ]; then
         exec "$@"
-    else
-        prepare_file_permissions
-        prepare_storage
-        run_migrations
-        optimize_app
-        run_server "$@"
     fi
-}
 
-prepare_file_permissions() {
-    chmod a+x ./artisan
+    prepare_storage
+    run_migrations
+    optimize_app
+    run_server "$@"
 }
 
 prepare_storage() {
@@ -22,8 +17,7 @@ prepare_storage() {
     mkdir -p /usr/share/nginx/html/storage/framework/sessions
     mkdir -p /usr/share/nginx/html/storage/framework/views
 
-    chmod -R 775 /usr/share/nginx/html/storage
-
+    chmod -R 775 /usr/share/nginx/html/storage || true
     php artisan storage:link || true
 }
 
