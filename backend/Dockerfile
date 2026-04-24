@@ -1,4 +1,3 @@
-
 # ---------- Stage 1: Composer deps ----------
 FROM composer:2 AS vendor
 WORKDIR /app
@@ -19,24 +18,36 @@ COPY . .
 RUN npm run build
 
 # ---------- Stage 3: Runtime ----------
-FROM php:8.3-fpm-alpine AS app
+FROM php:8.4-fpm AS app
 
-# Install only runtime deps; keep it tight
-RUN apk add --no-cache \
-    icu-libs libzip libpng freetype \
-  && apk add --no-cache --virtual .build-deps \
-    icu-dev libzip-dev libpng-dev freetype-dev oniguruma-dev $PHPIZE_DEPS \
-  && docker-php-ext-install pdo pdo_mysql intl zip mbstring opcache \
-  && apk del .build-deps
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    libzip-dev \
+    libpng-dev \
+    libpq-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /var/www
+# Install PHP extensions
+RUN docker-php-ext-install pdo pdo_mysql pgsql pdo_pgsql gd bcmath zip sockets \
+    && docker-php-ext-configure pcntl --enable-pcntl \
+    && docker-php-ext-install pcntl \
+    && pecl install redis \
+    && docker-php-ext-enable redis \
 
-# Copy only what you need from build stages
-COPY --from=vendor /app /var/www
-COPY --from=frontend /app/public/build /var/www/public/build
+# Run Laravel commands and set permissions
+RUN php artisan package:discover --ansi \
+    && chmod -R 775 storage bootstrap/cache \
+    && chown -R www-data:www-data storage bootstrap/cache \
+    && mkdir -p storage/framework/{sessions,views,cache}
 
-# Permissions (Laravel needs these)
-RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+# Copy entrypoint
+COPY ./scripts/php-fpm-entrypoint /usr/local/bin/php-entrypoint
 
-USER www-data
+# Give permisisons to everything in bin/
+RUN chmod a+x /usr/local/bin/*
+
+ENTRYPOINT ["/usr/local/bin/php-entrypoint"]
+
 CMD ["php-fpm"]
