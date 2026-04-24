@@ -1,5 +1,5 @@
 # ---------- Stage 1: Build frontend assets (Node only here) ----------
-FROM node:24-bookworm-slim AS node_builder
+FROM node:24-alpine AS node_builder
 WORKDIR /app
 
 # Workaround for rolldown native binding issues in some environments
