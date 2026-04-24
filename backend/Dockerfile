@@ -22,7 +22,6 @@ WORKDIR /app
 
 COPY composer.json composer.lock ./
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
-
 RUN composer install --no-dev --optimize-autoloader --no-scripts --no-interaction --prefer-dist
 
 COPY . .
