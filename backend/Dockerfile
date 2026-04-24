@@ -29,11 +29,10 @@ RUN apt-get update && apt-get install -y \
     curl \
     libzip-dev \
     libpng-dev \
-    libpq-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-RUN docker-php-ext-install pdo pdo_mysql pgsql pdo_pgsql gd bcmath zip sockets \
+RUN docker-php-ext-install pdo pdo_mysql gd bcmath zip sockets \
     && docker-php-ext-configure pcntl --enable-pcntl \
     && docker-php-ext-install pcntl \
     && pecl install redis \
