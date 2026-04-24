@@ -1,15 +1,13 @@
-
 # ---------- Stage 1: Build frontend assets (Node only here) ----------
 FROM node:24-bookworm-slim AS node_builder
 WORKDIR /app
 
 # Cache npm install
-COPY backend/package.json backend/package-lock.json* ./backend/
-WORKDIR /app/backend
+COPY package.json package-lock.json* ./
 RUN npm ci
 
 # Build assets
-COPY backend/ ./
+COPY . .
 RUN npm run build
 
 
@@ -44,25 +42,25 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 WORKDIR /usr/share/nginx/html
 
 # Cache composer install
-COPY backend/composer.json backend/composer.lock ./
+COPY composer.json composer.lock ./
 RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress --prefer-dist \
   && composer clear-cache
 
 # Copy app
-COPY backend/ ./
+COPY . .
 
 # Copy built frontend assets
-COPY --from=node_builder /app/backend/public/build ./public/build
+COPY --from=node_builder /app/public/build ./public/build
 
 # Laravel setup + permissions
-RUN php artisan package:discover --ansi \
+RUN mkdir -p storage/framework/{sessions,views,cache} bootstrap/cache \
+  && php artisan package:discover --ansi \
   && chmod -R 775 storage bootstrap/cache \
-  && chown -R www-data:www-data storage bootstrap/cache \
-  && mkdir -p storage/framework/{sessions,views,cache}
+  && chown -R www-data:www-data storage bootstrap/cache
 
 # Entrypoint
-COPY ./scripts/php-fpm-entrypoint /usr/local/bin/php-entrypoint
-RUN chmod a+x /usr/local/bin/*
+COPY scripts/php-fpm-entrypoint /usr/local/bin/php-entrypoint
+RUN chmod +x /usr/local/bin/php-entrypoint
 
 ENTRYPOINT ["/usr/local/bin/php-entrypoint"]
 CMD ["php-fpm"]
