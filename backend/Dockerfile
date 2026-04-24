@@ -27,13 +27,8 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libpq-dev \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
 
-WORKDIR /var/www
-
-# Copy only what you need from build stages
-COPY --from=vendor /app /var/www
-COPY --from=frontend /app/public/build /var/www/public/build
 
 # Install PHP extensions
 RUN docker-php-ext-install pdo pdo_mysql pgsql pdo_pgsql gd bcmath zip sockets \
