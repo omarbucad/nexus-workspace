@@ -136,6 +136,7 @@
       <path value="$PROJECT_DIR$/backend/vendor/nunomaduro/pao" />
       <path value="$PROJECT_DIR$/backend/vendor/laravel/horizon" />
       <path value="$PROJECT_DIR$/backend/vendor/laravel/sentinel" />
+      <path value="$PROJECT_DIR$/backend/vendor/symfony/polyfill-php83" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.3" />
