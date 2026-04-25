@@ -9,35 +9,28 @@ RUN composer install \
   --prefer-dist \
   --no-interaction \
   --optimize-autoloader \
-  --ignore-platform-req=ext-pcntl \
-  --no-scripts
+  --ignore-platform-req=ext-pcntl
 
 COPY . .
-
-RUN composer dump-autoload --optimize
-RUN php artisan package:discover --ansi || true
 
 
 # ---------- Stage 2: Frontend (Vite build) ----------
 FROM node:20-alpine AS frontend
 WORKDIR /app
 
-# Install deps with cache efficiency
 COPY package.json package-lock.json ./
 RUN npm ci
 
-# Copy ONLY frontend-related files
 COPY resources ./resources
 COPY public ./public
 COPY vite.config.* ./
 COPY tailwind.config.* ./
 COPY postcss.config.* ./
 
-# Build assets
 RUN npm run build
 
 
-# ---------- Stage 3: PHP runtime ----------
+# ---------- Stage 3: PHP Runtime ----------
 FROM php:8.4-fpm AS app
 
 WORKDIR /var/www
@@ -57,18 +50,18 @@ RUN docker-php-ext-install pdo pdo_mysql gd bcmath zip sockets \
     && pecl install redis \
     && docker-php-ext-enable redis
 
-# Copy app (without node_modules, etc.)
+# Copy backend app
 COPY --from=vendor /app /var/www
 
-# Copy built frontend assets ONLY
+# Copy Vite build output
 COPY --from=frontend /app/public/build /var/www/public/build
 
-# Fix permissions
-RUN chown -R www-data:www-data \
-    /var/www/storage \
-    /var/www/bootstrap/cache
+# Ensure Laravel can write to storage
+RUN mkdir -p /var/www/storage /var/www/bootstrap/cache \
+    && chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache \
+    && chmod -R 775 /var/www/storage
 
-# Clear Laravel caches (prevents stale Vite manifest issues)
+# Clear any stale caches (safe in build)
 RUN php artisan optimize:clear || true
 
 # Entrypoint
