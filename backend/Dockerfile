@@ -1,45 +1,29 @@
-# ---------- Stage 1: Composer dependencies ----------
+# ---------- Stage 1: Composer deps ----------
 FROM composer:2 AS vendor
-WORKDIR /app
+WORKDIR /usr/share/nginx/html
 
-COPY composer.json composer.lock ./
-
+COPY . .
 RUN composer install \
   --no-dev \
   --prefer-dist \
   --no-interaction \
   --optimize-autoloader \
-  --ignore-platform-req=ext-pcntl \
-  --no-scripts
+  --ignore-platform-req=ext-pcntl
 
-COPY . .
 
-RUN php artisan package:discover --ansi || true
-RUN php artisan config:clear || true
-RUN php artisan optimize:clear || true
-
-# ---------- Stage 2: Frontend (Vite build) ----------
+# ---------- Stage 2: Frontend build ----------
 FROM node:20-alpine AS frontend
 WORKDIR /app
-
-COPY package.json package-lock.json ./
+COPY package*.json ./
 RUN npm ci
-
-COPY resources ./resources
-COPY public ./public
-COPY vite.config.* ./
-COPY tailwind.config.* ./
-COPY postcss.config.* ./
-
+COPY . .
 RUN npm run build
 
-
-# ---------- Stage 3: PHP Runtime ----------
+# ---------- Stage 3: Runtime ----------
 FROM php:8.4-fpm AS app
 
-WORKDIR /var/www
+WORKDIR /usr/share/nginx/html
 
-# System dependencies
 RUN apt-get update && apt-get install -y \
     curl \
     libzip-dev \
@@ -47,30 +31,19 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# PHP extensions
 RUN docker-php-ext-install pdo pdo_mysql gd bcmath zip sockets \
     && docker-php-ext-configure pcntl --enable-pcntl \
     && docker-php-ext-install pcntl \
     && pecl install redis \
     && docker-php-ext-enable redis
 
-# Copy backend app
-COPY --from=vendor /app /var/www
+COPY --from=vendor /usr/share/nginx/html /usr/share/nginx/html
+COPY --from=frontend /app/public/build /usr/share/nginx/html/public/build
 
-# Copy Vite build output
-COPY --from=frontend /app/public/build /var/www/public/build
+RUN chown -R www-data:www-data /usr/share/nginx/html/storage /usr/share/nginx/html/bootstrap/cache
 
-# Ensure Laravel can write to storage
-RUN mkdir -p /var/www/storage /var/www/bootstrap/cache \
-    && chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache \
-    && chmod -R 775 /var/www/storage
-
-# Clear any stale caches (safe in build)
-RUN php artisan optimize:clear || true
-
-# Entrypoint
 COPY ./scripts/php-fpm-entrypoint /usr/local/bin/php-entrypoint
-RUN chmod +x /usr/local/bin/php-entrypoint
+RUN chmod a+x /usr/local/bin/*
 
-ENTRYPOINT ["php-entrypoint"]
+ENTRYPOINT ["/usr/local/bin/php-entrypoint"]
 CMD ["php-fpm"]

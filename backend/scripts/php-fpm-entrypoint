@@ -1,17 +1,31 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 
-APP=/var/www
+main() {
+    if [ "$IS_WORKER" = "true" ]; then
+        exec "$@"
+    fi
 
-prepare() {
-    mkdir -p $APP/storage/framework/{cache,sessions,views}
+    prepare_file_permissions
+    prepare_storage
 
-    chown -R www-data:www-data $APP/storage $APP/bootstrap/cache || true
-    chmod -R 775 $APP/storage || true
-
-    php $APP/artisan storage:link || true
+    exec "$@"
 }
 
-prepare
+prepare_file_permissions() {
+    chmod a+x /usr/share/nginx/html/artisan || true
+    chown -R www-data:www-data /usr/share/nginx/html/storage /usr/share/nginx/html/bootstrap/cache || true
+}
 
-exec "$@"
+prepare_storage() {
+    mkdir -p /usr/share/nginx/html/storage/framework/cache/data
+    mkdir -p /usr/share/nginx/html/storage/framework/sessions
+    mkdir -p /usr/share/nginx/html/storage/framework/views
+
+    chown -R www-data:www-data /usr/share/nginx/html/storage
+    chmod -R 775 /usr/share/nginx/html/storage
+
+    php /usr/share/nginx/html/artisan storage:link || true
+}
+
+main "$@"

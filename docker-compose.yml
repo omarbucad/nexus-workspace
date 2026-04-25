@@ -1,3 +1,4 @@
+
 services:
   app:
     build:
@@ -9,7 +10,8 @@ services:
     env_file:
       - .env
     volumes:
-      - storage:/var/www/storage
+      - storage:/usr/share/nginx/html/storage
+      - public:/usr/share/nginx/html/public
 
   horizon:
     build:
@@ -22,21 +24,20 @@ services:
     env_file:
       - .env
     volumes:
-      - storage:/var/www/storage
+      - storage:/usr/share/nginx/html/storage
+      - public:/usr/share/nginx/html/public
 
   nginx:
     image: nginx:1-alpine
     restart: unless-stopped
     depends_on:
       - app
-    ports:
+    expose:
       - "80"
     volumes:
-      # 🔥 IMPORTANT: share the SAME app code so nginx sees Vite build
-      - ./backend:/var/www:ro
-
-      # nginx config
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - storage:/usr/share/nginx/html/storage
+      - public:/usr/share/nginx/html/public:ro
 
   redis:
     image: redis:7.4.6-alpine
@@ -46,4 +47,5 @@ services:
 
 volumes:
   storage:
+  public:
   redis-data:
