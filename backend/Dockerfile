@@ -2,7 +2,6 @@
 FROM composer:2 AS vendor
 WORKDIR /app
 
-# Copy only composer files first (better caching)
 COPY composer.json composer.lock ./
 
 RUN composer install \
@@ -10,12 +9,13 @@ RUN composer install \
   --prefer-dist \
   --no-interaction \
   --optimize-autoloader \
-  --ignore-platform-req=ext-pcntl
+  --ignore-platform-req=ext-pcntl \
+  --no-scripts
 
-# Copy the rest of the app AFTER deps
 COPY . .
 
 RUN composer dump-autoload --optimize
+RUN php artisan package:discover --ansi || true
 
 
 # ---------- Stage 2: Frontend (Vite build) ----------
