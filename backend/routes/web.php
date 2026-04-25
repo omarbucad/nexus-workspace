@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function(){
-    return "HELLO WORLD";
+    return inertia('test');
 });
 
 Route::get('/dashboard', function () {

@@ -1,7 +1,22 @@
-@import 'tailwindcss';
 
-@source '../views';
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+/* Tailwind core */
+@import "tailwindcss";
+
+/* PrimeReact + Theme */
+@import 'primereact/resources/themes/md-light-indigo/theme.css' layer(primereact);
+
+/* DO NOT wrap PrimeIcons inside a layer — Vite will skip font assets */
+@import 'primeicons/primeicons.css';
+
+/* Extra safety: direct font-face ensures Vite copies the font files */
+@font-face {
+    font-family: "PrimeIcons";
+    src: url("primeicons/fonts/primeicons.woff2") format("woff2"),
+    url("primeicons/fonts/primeicons.woff") format("woff"),
+    url("primeicons/fonts/primeicons.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
 
 @theme {
     --font-sans:
