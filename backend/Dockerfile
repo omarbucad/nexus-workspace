@@ -10,7 +10,8 @@ RUN composer install \
   --prefer-dist \
   --no-interaction \
   --optimize-autoloader \
-  --ignore-platform-req=ext-pcntl
+  --ignore-platform-req=ext-pcntl \
+  --no-scripts
 
 COPY . .
 
