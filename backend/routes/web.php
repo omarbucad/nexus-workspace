@@ -1,11 +1,12 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
 Route::get('/', function(){
-    return inertia('test');
+    return Inertia::render('welcome');
 });
 
 Route::get('/dashboard', function () {
-    return inertia('welcome');
+    return Inertia::render('test');
 });
