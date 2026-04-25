@@ -12,11 +12,6 @@ services:
     volumes:
       - storage:/usr/share/nginx/html/storage
       - public:/usr/share/nginx/html/public
-    depends_on:
-      - mysql
-      - redis
-    networks:
-      - app_net
 
   horizon:
     build:
@@ -26,14 +21,11 @@ services:
     restart: unless-stopped
     depends_on:
       - redis
-      - mysql
     env_file:
       - .env
     volumes:
       - storage:/usr/share/nginx/html/storage
       - public:/usr/share/nginx/html/public
-    networks:
-      - app_net
 
   nginx:
     image: nginx:1-alpine
@@ -46,62 +38,14 @@ services:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - storage:/usr/share/nginx/html/storage
       - public:/usr/share/nginx/html/public:ro
-    networks:
-      - app_net
 
   redis:
     image: redis:7.4.6-alpine
     restart: always
     volumes:
       - redis-data:/data
-    networks:
-      - app_net
-
-  mysql:
-    image: mysql:8.4
-    container_name: mysql84
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-app_db}
-    # Expose only to other services; remove ports unless you need host access
-    expose:
-      - "3306"
-    volumes:
-      - mysql-data:/var/lib/mysql
-    healthcheck:
-      test: [ "CMD-SHELL", "exit | mysql -h localhost -P 3306 -u root -p$$MYSQL_ROOT_PASSWORD" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    networks:
-      - app_net
-
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin:latest
-    container_name: phpmyadmin
-    restart: unless-stopped
-    depends_on:
-      - mysql
-    environment:
-      PMA_HOST: mysql
-      PMA_PORT: 3306
-      # You can login as root in the UI; these defaults just prefill connection
-      PMA_USER: root
-      PMA_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
-      UPLOAD_LIMIT: 64M
-    ports:
-      - "8080:80"
-    networks:
-      - app_net
 
 volumes:
   storage:
   public:
   redis-data:
-  mysql-data:
-
-networks:
-  app_net:
-    driver: bridge
