@@ -11,6 +11,7 @@ services:
       - .env
     volumes:
       - storage:/usr/share/nginx/html/storage
+      - public:/usr/share/nginx/html/public
 
   horizon:
     build:
@@ -24,6 +25,7 @@ services:
       - .env
     volumes:
       - storage:/usr/share/nginx/html/storage
+      - public:/usr/share/nginx/html/public
 
   nginx:
     image: nginx:1-alpine
@@ -35,6 +37,7 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - storage:/usr/share/nginx/html/storage
+      - public:/usr/share/nginx/html/public:ro
 
   redis:
     image: redis:7.4.6-alpine
@@ -44,4 +47,5 @@ services:
 
 volumes:
   storage:
+  public:
   redis-data:
