@@ -29,11 +29,14 @@ services:
     restart: unless-stopped
     depends_on:
       - app
-    expose:
+    ports:
       - "80"
     volumes:
+      # 🔥 IMPORTANT: share the SAME app code so nginx sees Vite build
+      - ./backend:/var/www:ro
+
+      # nginx config
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - storage:/var/www/storage
 
   redis:
     image: redis:7.4.6-alpine
