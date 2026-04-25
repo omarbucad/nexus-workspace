@@ -12,27 +12,12 @@ RUN composer install \
 
 
 # ---------- Stage 2: Frontend build ----------
-
-
-
 FROM node:20-alpine AS frontend
 WORKDIR /app
-
 COPY package*.json ./
 RUN npm ci
-
-# copy EVERYTHING needed to build
-COPY vite.config.* ./
-COPY resources ./resources
-COPY public ./public
-COPY tailwind.config.* postcss.config.* ./
-COPY tsconfig.* jsconfig.* ./
-COPY .env* ./
-
+COPY . .
 RUN npm run build
-
-
-
 
 # ---------- Stage 3: Runtime ----------
 FROM php:8.4-fpm AS app
