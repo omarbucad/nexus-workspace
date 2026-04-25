@@ -1,6 +1,6 @@
 import { Button } from 'primereact/button'
 
-export default function Dashboard() {
+export default function Test() {
     return (
         <div>
             <h1>Dashboard</h1>
