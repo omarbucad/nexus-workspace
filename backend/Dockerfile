@@ -9,10 +9,14 @@ RUN composer install \
   --prefer-dist \
   --no-interaction \
   --optimize-autoloader \
-  --ignore-platform-req=ext-pcntl
+  --ignore-platform-req=ext-pcntl \
+  --no-scripts
 
 COPY . .
 
+RUN php artisan package:discover --ansi || true
+RUN php artisan config:clear || true
+RUN php artisan optimize:clear || true
 
 # ---------- Stage 2: Frontend (Vite build) ----------
 FROM node:20-alpine AS frontend
