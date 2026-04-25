@@ -20,6 +20,11 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 
+# copy ONLY frontend sources
+COPY resources ./resources
+COPY vite.config.* ./
+COPY public ./public
+
 RUN npm run build
 
 
