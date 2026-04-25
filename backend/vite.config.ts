@@ -21,7 +21,11 @@ export default defineConfig({
         }),
         tailwindcss()
     ],
+
     build: {
+        outDir: 'public/build',
+        manifest: true,
         emptyOutDir: true,
     },
+
 });
