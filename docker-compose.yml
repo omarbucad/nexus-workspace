@@ -42,8 +42,6 @@ services:
       - app
     expose:
       - "80"
-    ports:
-      - "80:80"
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - storage:/usr/share/nginx/html/storage
