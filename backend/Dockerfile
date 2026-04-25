@@ -2,37 +2,21 @@
 FROM composer:2 AS vendor
 WORKDIR /usr/share/nginx/html
 
-# Copy only composer files first (better caching)
-COPY composer.json composer.lock ./
-
+COPY . .
 RUN composer install \
   --no-dev \
   --prefer-dist \
   --no-interaction \
   --optimize-autoloader \
   --ignore-platform-req=ext-pcntl
-
-# Copy the rest of the app AFTER deps
 COPY . .
-
-RUN composer dump-autoload --optimize
 
 # ---------- Stage 2: Frontend build ----------
 FROM node:20-alpine AS frontend
-WORKDIR /usr/share/nginx/html
-
-# Install deps with cache efficiency
-COPY package.json package-lock.json ./
+WORKDIR /app
+COPY package*.json ./
 RUN npm ci
-
-# Copy ONLY frontend-related files
-COPY resources ./resources
-COPY public ./public
-COPY vite.config.* ./
-COPY tailwind.config.* ./
-COPY postcss.config.* ./
-
-# Build assets
+COPY . .
 RUN npm run build
 
 # ---------- Stage 3: Runtime ----------
