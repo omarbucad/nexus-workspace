@@ -21,4 +21,7 @@ export default defineConfig({
         }),
         tailwindcss()
     ],
+    build: {
+        emptyOutDir: true,
+    },
 });
