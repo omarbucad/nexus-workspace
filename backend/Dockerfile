@@ -2,32 +2,21 @@
 FROM composer:2 AS vendor
 WORKDIR /usr/share/nginx/html
 
-
-COPY composer.json composer.lock ./
-
+COPY . .
 RUN composer install \
   --no-dev \
   --prefer-dist \
   --no-interaction \
   --optimize-autoloader \
-  --ignore-platform-req=ext-pcntl \
-  --no-scripts
-
-COPY . .
+  --ignore-platform-req=ext-pcntl
 
 
 # ---------- Stage 2: Frontend build ----------
 FROM node:20-alpine AS frontend
 WORKDIR /app
-COPY package.json package-lock.json ./
+COPY package*.json ./
 RUN npm ci
-
-COPY resources ./resources
-COPY public ./public
-COPY vite.config.* ./
-COPY tailwind.config.* ./
-COPY postcss.config.* ./
-
+COPY . .
 RUN npm run build
 
 # ---------- Stage 3: Runtime ----------
