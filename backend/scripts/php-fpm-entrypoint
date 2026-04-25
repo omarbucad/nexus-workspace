@@ -1,5 +1,7 @@
-#!/bin/bash
+#!/bin/sh
 set -e
+
+APP_DIR=/var/www
 
 main() {
     if [ "$IS_WORKER" = "true" ]; then
@@ -13,19 +15,19 @@ main() {
 }
 
 prepare_file_permissions() {
-    chmod a+x /usr/share/nginx/html/artisan || true
-    chown -R www-data:www-data /usr/share/nginx/html/storage /usr/share/nginx/html/bootstrap/cache || true
+    chmod a+x $APP_DIR/artisan || true
+    chown -R www-data:www-data $APP_DIR/storage $APP_DIR/bootstrap/cache || true
 }
 
 prepare_storage() {
-    mkdir -p /usr/share/nginx/html/storage/framework/cache/data
-    mkdir -p /usr/share/nginx/html/storage/framework/sessions
-    mkdir -p /usr/share/nginx/html/storage/framework/views
+    mkdir -p $APP_DIR/storage/framework/cache/data
+    mkdir -p $APP_DIR/storage/framework/sessions
+    mkdir -p $APP_DIR/storage/framework/views
 
-    chown -R www-data:www-data /usr/share/nginx/html/storage
-    chmod -R 775 /usr/share/nginx/html/storage
+    chown -R www-data:www-data $APP_DIR/storage
+    chmod -R 775 $APP_DIR/storage
 
-    php /usr/share/nginx/html/artisan storage:link || true
+    php $APP_DIR/artisan storage:link || true
 }
 
 main "$@"
