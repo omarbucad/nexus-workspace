@@ -61,22 +61,22 @@ services:
     image: mysql:8.4
     container_name: mysql84
     restart: unless-stopped
+    env_file:
+      - .env
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
       MYSQL_DATABASE: ${MYSQL_DATABASE:-app_db}
-      MYSQL_USER: ${MYSQL_USER:-app_user}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-app_password}
     # Expose only to other services; remove ports unless you need host access
     expose:
       - "3306"
-    # Uncomment if you want to connect from your host (Sequel Ace, DBeaver, etc.)
-    # ports:
-    #   - "3306:3306"
     volumes:
       - mysql-data:/var/lib/mysql
-    command:
-      - "--default-authentication-plugin=caching_sha2_password"
-      - "--mysql-native-password=OFF"
+    healthcheck:
+      test: [ "CMD-SHELL", "exit | mysql -h localhost -P 3306 -u root -p$$MYSQL_ROOT_PASSWORD" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     networks:
       - app_net
 
