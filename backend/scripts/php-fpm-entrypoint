@@ -7,7 +7,6 @@ main() {
         prepare_file_permissions
         run_npm_build
         prepare_storage
-        wait_for_db
         run_migrations
         optimize_app
         run_server "$@"
@@ -43,13 +42,6 @@ prepare_storage() {
 
     # Ensure the symlink exists
     php artisan storage:link
-}
-
-wait_for_db() {
-    echo "Waiting for DB to be ready"
-    until ./artisan migrate:status 2>&1 | grep -q -E "(Migration table not found|Migration name)"; do
-        sleep 1
-    done
 }
 
 run_migrations() {
