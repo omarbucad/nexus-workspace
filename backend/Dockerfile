@@ -13,7 +13,7 @@ RUN composer install \
 
 # ---------- Stage 2: Frontend build ----------
 FROM node:20-alpine AS frontend
-WORKDIR /usr/share/nginx/html
+WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
